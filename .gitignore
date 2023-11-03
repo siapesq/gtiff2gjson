@@ -1,0 +1,9 @@
+*.tif
+*.tiff
+*.geojson
+venv
+dist
+build
+*.gz
+*.spec
+__pycache__
