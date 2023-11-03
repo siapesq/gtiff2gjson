@@ -24,6 +24,10 @@ Python CLI para converter GeoTiffs de 2 Bandas para geojson
       * Inicie o python Venv
         
             python3 -m venv venv
+
+      * Carregue o script do venv pro seu shell(exemplo com fish)
+        
+            source venv/bin/activate.fish
         
       * Instale todas as dependências(Talvez seja necessário instalar o gdal na sua máquina)
 
