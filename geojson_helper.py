@@ -53,6 +53,17 @@ def create_multipolygon(cordinates:list[list],properties:dict)->Feature:
     except Exception as err:
         raise Exception(err)
 
+def make_convex_from_polygon(cordinates):
+    try:
+        points=[]
+        for point in cordinates:
+            feature=Feature(geometry=Point(coordinates=point))
+            points.append(feature)
+        feature=convex(features=FeatureCollection(points))
+        return feature
+    except Exception as err:
+        raise Exception(err)
+
 def write_geojson(geojson_name:str,features:list[Feature]):
     try:
         logger.info(f"Dumping GeoJSON to Output File {geojson_name}")
@@ -62,6 +73,51 @@ def write_geojson(geojson_name:str,features:list[Feature]):
     except Exception as err:
         raise Exception(err)
     
+def create_multipolygon_from_points_with_same_color(
+    max_distance_between_points:int,
+    points_coords:list,
+    color:str
+)->Feature | None:
+    try:
+        polygons=[]
+        for index in range(0,len(points_coords)):
+
+            current_point=Point(points_coords[index])
+            polygon_coords=[points_coords[index]]
+            
+            is_last_point=index==len(points_coords)-1
+            if is_last_point:
+                break
+
+            for next_index in range(index+1,len(points_coords)):
+                next_point=Point(points_coords[next_index])
+                distance=measurement.distance(point1=current_point,point2=next_point,units='km')
+
+                if distance<=max_distance_between_points:
+                    #new_vertice
+                    polygon_coords.append(points_coords[next_index])
+                else:
+                    #close polygon
+                    polygon_coords.append(points_coords[index])
+                    break
+
+            has_linear_ring=len(polygon_coords)>=4
+            if has_linear_ring:
+                feature=make_convex_from_polygon(cordinates=polygon_coords)
+                convex_coordinates=feature['geometry']['coordinates']
+
+                if type(convex_coordinates[0][0])==list:
+                    polygons.append(convex_coordinates)
+
+        if len(polygons)>0:
+            properties=create_polygon_properties(color=color)
+            feature=create_multipolygon(cordinates=polygons,properties=properties)
+            return feature
+
+    except Exception as err:
+        raise Exception(err)
+
+
 def build_geojson(
     geojson_name:str,
     points:list[list[dict[str]]],
@@ -73,57 +129,26 @@ def build_geojson(
         features=[]
         for r in range(min_channel_color,256):
             for g in range(min_channel_color,256):
-                coords_same_color=points[r][g]['coords']
-                if len(coords_same_color)==0:
-                    continue
-                polygons_coordinates=[]
-                for index in range(0,len(coords_same_color)):
-                    current_point=Point(coords_same_color[index])
-                    polygon_coords=[coords_same_color[index]]
-                    if index==len(coords_same_color)-1:
-                        break
-                    for next_index in range(index+1,len(coords_same_color)):
-                        next_point=Point(coords_same_color[next_index])
-                        distance=measurement.distance(point1=current_point,point2=next_point,units='km')
-                        if distance<=max_distance_between_points:
-                            polygon_coords.append(coords_same_color[next_index])
-                        else:
-                            polygon_coords.append(coords_same_color[index])
-                            break
-                    if len(polygon_coords)>=4:
-                        p=[]
-                        for c in polygon_coords:
-                            feature=Feature(
-                                geometry=Point(coordinates=c)
-                            )
-                            p.append(feature)
-                        feature=convex(features=FeatureCollection(p))
-                        convex_coordinates=feature['geometry']['coordinates']
-                        if type(convex_coordinates[0][0])==list:
-                            polygons_coordinates.append(convex_coordinates)
 
-                if len(polygons_coordinates)>0:
-                    #create MultiPolygon
-                    color=points[r][g]['color']
-                    multipolygon=MultiPolygon(coordinates=polygons_coordinates)
-                    feature=Feature(
-                        geometry=multipolygon,
-                        properties={
-                            "fill":color,
-                            "stroke-width": 0,
-                            "stroke-opacity": 0,
-                            "fill-opacity": 1
-                        }
-                    )
-                    features.append(feature)
-                #feature=create_multipoint(
-                #    cordinates=coords,
-                #    properties={
-                #        "marker-color":color
-                #    }
-                #)
-                #features.append(feature)
+                points_coords=points[r][g]['coords']
+                color=points[r][g]['color']
+                
+                if len(points_coords)==0:
+                    continue
+
+                feature=create_multipolygon_from_points_with_same_color(
+                    max_distance_between_points=max_distance_between_points,
+                    points_coords=points_coords,
+                    color=color
+                )
+
+                if feature is None:
+                    continue
+
+                features.append(feature)
+
         write_geojson(geojson_name=geojson_name,features=features)
+
         logger.info(f"Number of features in GeoJSON {len(features)}")
 
     except Exception as err:
