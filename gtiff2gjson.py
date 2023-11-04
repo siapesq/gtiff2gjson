@@ -44,9 +44,12 @@ try:
         nome_geo_tiff=os.path.splitext(args.raster)[0]
         args.geojson=f"{nome_geo_tiff}.geojson"
     
-    if args.min_channel_color>254 or args.min_channel_color<=0:
+    if args.min_channel_color is None or args.min_channel_color>254 or args.min_channel_color<=0:
         raise Exception("--min-channel-color has invalid value")
 
+    if args.max_distance_between_points is None:
+        raise Exception("--max-distance-between-points has invalid value")
+    
     process_raster(
         raster_name=args.raster,
         geojson_name=args.geojson,
