@@ -1,4 +1,5 @@
 gdal
+numpy
 geojson
 wheel
 logzero

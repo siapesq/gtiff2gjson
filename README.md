@@ -56,6 +56,7 @@ Python CLI para converter GeoTiffs de 2 Bandas para geojson
   * wheel
   * logzero
   * turfpy
+  * numpy
   * pyinstaller
 
 
