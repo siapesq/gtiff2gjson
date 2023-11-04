@@ -1,7 +1,7 @@
 from logzero import logger
-from colors_helper import rgb_to_hex
-from geojson_helper import build_geojson
-from gdal_helper import get_global_coordinates,get_gdal_dataset,get_gdal_rgb_bands
+from utils.colors import rgb_to_hex
+from utils.gdal import get_global_coordinates,get_gdal_dataset,get_gdal_rgb_bands
+from utils.geojson import build_geojson
 
 def get_points_grouped_by_color(
     width:int,
@@ -32,7 +32,7 @@ def get_points_grouped_by_color(
         return points
     except Exception as err:
         raise Exception(err)
-
+    
 def process_raster(
     raster_name:str,
     geojson_name:str,
@@ -49,7 +49,6 @@ def process_raster(
         height = dataset.RasterYSize
         width = dataset.RasterXSize
         logger.info(f"Raster Resolution {width}X{height}")
-        
         points=get_points_grouped_by_color(
             width=width,
             height=height,
@@ -58,15 +57,12 @@ def process_raster(
             min_channel_color=min_channel_color,
             transform=transform
         )
-        
         build_geojson(
             geojson_name=geojson_name,
             points=points,
             min_channel_color=min_channel_color,
             max_distance_between_points=max_distance_between_points
         )
-        
         logger.info(f"Finish Processing Raster {raster_name} Output at {geojson_name}")
-        
     except Exception as err:
         raise Exception(err)

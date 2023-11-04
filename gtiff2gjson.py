@@ -1,5 +1,5 @@
 import argparse
-from raster import process_raster
+from utils.raster import process_raster
 from logzero import logger
 import os
 try:
