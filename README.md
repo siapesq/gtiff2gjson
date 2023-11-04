@@ -1,10 +1,10 @@
-# geotiff_conversor
+# gtiff2gjson
 Python CLI para converter GeoTiffs de 2 Bandas para geojson
 
 ### Uso 
   * Usando o Binário
     
-        usage: geotiff_conversor [-h] [--geojson [GEOJSON]] [--limiar_of_color [LIMIAR_OF_COLOR]]
+        usage: gtiff2gjson [-h] [--geojson [GEOJSON]] [--limiar_of_color [LIMIAR_OF_COLOR]]
                                [--max_distance_points [MAX_DISTANCE_POINTS]]
                                raste
         positional arguments:
@@ -35,17 +35,17 @@ Python CLI para converter GeoTiffs de 2 Bandas para geojson
 
       * Rode o script
 
-            python3 geotiff_conversor raster.tif
+            python3 gtiff2gjson raster.tif
 
   * Para Criar o Binário
     
        *  Compilar o trem com pyinstaller
 
-              pyinstaller geotiff_conversor
+              pyinstaller gtiff2gjson
           
        * Para Rodar
 
-             ./dist/geotiff_conversor/geotiff_conversor    
+             ./dist/gtiff2gjson/gtiff2gjson    
         
 ### Dependências
   * gdal
