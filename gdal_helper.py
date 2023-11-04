@@ -1,8 +1,7 @@
 from logzero import logger
 from osgeo import gdal
 gdal.UseExceptions()
-def get_global_coordinates(x, y,transform)->tuple:
-    """Returns global coordinates from pixel x, y coords"""
+def get_global_coordinates(x:int, y:int,transform:tuple[5])->tuple:
     try:
         x_origin=transform[0] 
         y_origin=transform[3] 

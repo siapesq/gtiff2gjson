@@ -31,6 +31,28 @@ def create_multipoint(cordinates:list[list],properties:dict)->Feature:
     except Exception as err:
         raise Exception(err)
 
+def create_polygon_properties(color:str)->dict:
+    try:
+        return{
+            "fill":color,
+            "stroke-width": 0,
+            "stroke-opacity": 0,
+            "fill-opacity": 1
+        }
+    except Exception as err:
+        raise Exception(err)
+    
+def create_multipolygon(cordinates:list[list],properties:dict)->Feature:
+    try:
+        multipolygon=MultiPolygon(coordinates=cordinates)
+        feature=Feature(
+            geometry=multipolygon,
+            properties=properties
+        )
+        return feature
+    except Exception as err:
+        raise Exception(err)
+
 def write_geojson(geojson_name:str,features:list[Feature]):
     try:
         logger.info(f"Dumping GeoJSON to Output File {geojson_name}")
@@ -40,25 +62,31 @@ def write_geojson(geojson_name:str,features:list[Feature]):
     except Exception as err:
         raise Exception(err)
     
-def create_geojson(geojson_name:str,points_same_color:list[list[dict[str]]],LIMIAR_OF_COLOR:int,MAX_DISTANCE_BETWEEN_POINTS:int):
+def build_geojson(
+    geojson_name:str,
+    points:list[list[dict[str]]],
+    min_channel_color:int,
+    max_distance_between_points:int
+):
     try:
         logger.info(f"Init GeoJSON Building")
         features=[]
-        for r in range(LIMIAR_OF_COLOR,256):
-            for g in range(LIMIAR_OF_COLOR,256):
-                coords_same_color=points_same_color[r][g]['coords']
+        for r in range(min_channel_color,256):
+            for g in range(min_channel_color,256):
+                coords_same_color=points[r][g]['coords']
                 if len(coords_same_color)==0:
                     continue
                 polygons_coordinates=[]
                 for index in range(0,len(coords_same_color)):
+                    print(coords_same_color)
                     current_point=Point(coords_same_color[index])
                     polygon_coords=[coords_same_color[index]]
-                    if index==len(coords_same_color):
+                    if index==len(coords_same_color)-1:
                         break
                     for next_index in range(index+1,len(coords_same_color)):
                         next_point=Point(coords_same_color[next_index])
                         distance=measurement.distance(point1=current_point,point2=next_point,units='km')
-                        if distance<=MAX_DISTANCE_BETWEEN_POINTS:
+                        if distance<=max_distance_between_points:
                             polygon_coords.append(coords_same_color[next_index])
                         else:
                             polygon_coords.append(coords_same_color[index])
@@ -76,7 +104,8 @@ def create_geojson(geojson_name:str,points_same_color:list[list[dict[str]]],LIMI
                             polygons_coordinates.append(convex_coordinates)
 
                 if len(polygons_coordinates)>0:
-                    color=points_same_color[r][g]['color']
+                    #create MultiPolygon
+                    color=points[r][g]['color']
                     multipolygon=MultiPolygon(coordinates=polygons_coordinates)
                     feature=Feature(
                         geometry=multipolygon,
@@ -97,6 +126,7 @@ def create_geojson(geojson_name:str,points_same_color:list[list[dict[str]]],LIMI
                 #features.append(feature)
         write_geojson(geojson_name=geojson_name,features=features)
         logger.info(f"Number of features in GeoJSON {len(features)}")
+
     except Exception as err:
 
         raise Exception(err)

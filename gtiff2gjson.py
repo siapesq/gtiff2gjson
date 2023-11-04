@@ -17,17 +17,17 @@ try:
         type=str
     )
     parser.add_argument(
-        "--limiar_of_color",
+        "--min-channel-color",
         nargs='?',
-        default=100,
-        help="Limiar de cor é o limite do tom das Bandas RGB.\nPor Exemplo Se for 100,Só serão considerados pixels com a banda R e G superiores a 100",
+        default=90,
+        help="",
         type=int
     )
     parser.add_argument(
-        "--max_distance_points",
+        "--max-distance-between-points",
         nargs='?',
-        default=500,
-        help="É a distancia máxima em KiloMetros entre 2 pontos da mesma cor.\nÉ utilizado para a construção do GeoJSON",
+        default=200,
+        help="",
         type=int
     )
     args=parser.parse_args()
@@ -36,7 +36,12 @@ try:
         nome_geo_tiff=os.path.splitext(args.raster)[0]
         args.geojson=f"{nome_geo_tiff}.geojson"
     
-    process_raster(args.raster,args.geojson,args.limiar_of_color,args.max_distance_points)
-
+    process_raster(
+        raster_name=args.raster,
+        geojson_name=args.geojson,
+        min_channel_color=args.min_channel_color,
+        max_distance_between_points=args.max_distance_between_points
+    )
+    
 except Exception as err:
     logger.error(err)
