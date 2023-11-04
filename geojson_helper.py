@@ -78,7 +78,6 @@ def build_geojson(
                     continue
                 polygons_coordinates=[]
                 for index in range(0,len(coords_same_color)):
-                    print(coords_same_color)
                     current_point=Point(coords_same_color[index])
                     polygon_coords=[coords_same_color[index]]
                     if index==len(coords_same_color)-1:
@@ -92,13 +91,13 @@ def build_geojson(
                             polygon_coords.append(coords_same_color[index])
                             break
                     if len(polygon_coords)>=4:
-                        points=[]
+                        p=[]
                         for c in polygon_coords:
                             feature=Feature(
                                 geometry=Point(coordinates=c)
                             )
-                            points.append(feature)
-                        feature=convex(features=FeatureCollection(points))
+                            p.append(feature)
+                        feature=convex(features=FeatureCollection(p))
                         convex_coordinates=feature['geometry']['coordinates']
                         if type(convex_coordinates[0][0])==list:
                             polygons_coordinates.append(convex_coordinates)
